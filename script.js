@@ -16,65 +16,8 @@ function click(position) {
 
 }
 
-// var dragged = false
-// class Joint {
-//     constructor(x, y) {
-//         this.pos = {x:x, y:y}
-//         this.beingDragged = false
-//     }
-
-//     draw() {
-//         ctx.lineWidth = 5
-//         ctx.beginPath()
-//         ctx.arc(this.pos.x, this.pos.y, 25, 0, 2*Math.PI)
-//         ctx.closePath()
-//         ctx.stroke()
-//     }
-// }
-
-// class Tri {
-//     constructor(joint1, joint2, joint3) {
-//         this.joints = [joint1, joint2, joint3]
-//     }
-
-//     draw() {
-//         this.joints.forEach((joint, index) => {
-//             joint.draw()
-
-//             // dragging
-//             if (index == 2) {
-//                 if (distance(mousePosition, joint.pos) <= 25) {
-//                     if (mouseDown && !dragged) {
-//                         joint.beingDragged = true
-//                         dragged = true
-//                     }
-//                 } else {
-//                 }
-//                 if (!mouseDown) {
-//                     joint.beingDragged = false
-//                     dragged = false
-//                 }
-//                 if (joint.beingDragged) {
-//                     joint.pos = mousePosition
-//                 }
-//             }
-
-//             // drawing limbs
-//             if (index != this.joints.length-1) {
-//                 ctx.beginPath()
-//                 ctx.moveTo(this.joints[index].pos.x, this.joints[index].pos.y)
-//                 ctx.lineTo(this.joints[index + 1].pos.x, this.joints[index + 1].pos.y)
-//                 ctx.closePath()
-//                 ctx.strokeStyle = "black"
-//                 ctx.stroke()
-//             }
-//         })
-//     }
-// }
-
 var shaking = false
 var shakeFactor = 10
-// var tris = [new Tri(new Joint(400, 300), new Joint(550, 600), new Joint(800, 500))]
 var a = 500
 var b = 500
 var c = 800
@@ -127,6 +70,10 @@ function runtime() {
     ctx.beginPath()
     ctx.moveTo(a, b)
     ctx.lineTo(closest[1].x, closest[1].y)
+    ctx.closePath()
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(closest[1].x, closest[1].y)
     ctx.lineTo(c, d)
     ctx.moveTo(a, b)
     ctx.closePath()
@@ -173,20 +120,6 @@ function runtime() {
             d = mousePosition.y
         }
     }
-    // if (distance(mousePosition, joint.pos) <= 25) {
-    //     if (mouseDown && !dragged) {
-    //         joint.beingDragged = true
-    //         dragged = true
-    //     }
-    // } else {
-    // }
-    // if (!mouseDown) {
-    //     joint.beingDragged = false
-    //     dragged = false
-    // }
-    // if (joint.beingDragged) {
-    //     joint.pos = mousePosition
-    // }
 
     ctx.restore()
 }
