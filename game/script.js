@@ -18,7 +18,7 @@ function click(position) {
 
 var shaking = false
 var shakeFactor = 10
-var a = 100
+var a = 125
 var b = 800
 var c = 600
 var d = 300
@@ -29,6 +29,8 @@ const hold = 25
 var currentlyDragging = false
 const i0 = {x:(r<q ? a:c) + (r<q ? r : q)*Math.cos(0*Math.PI/180), y:(r<q ? b:d) + (r<q ? r:q)*Math.sin(0*Math.PI/180)}
 var lastAngle = 0
+var interval1 = [60, 120]
+var interval2 = [85, 180]
 function runtime() {
     ctx.save()
     if (shaking) {
@@ -58,7 +60,6 @@ function runtime() {
             if (Math.abs(distance(center, {x:a, y:b}) - r) + Math.abs(distance(center, {x:c, y:d}) - q) < closest[0]) {
                 closest = [Math.abs(distance(center, {x:a, y:b}) - r) + Math.abs(distance(center, {x:c, y:d}) - q), center, i]
             }
-            // ctx.fill()
         }
     }
 
@@ -76,23 +77,16 @@ function runtime() {
     ctx.closePath()
     ctx.stroke()
 
-    // ctx.lineWidth = 1
-    // ctx.beginPath()
-    // ctx.arc(a, b, r, 0, 2*Math.PI)
-    // ctx.closePath()
-    // ctx.stroke()
-    // ctx.beginPath()
-    // ctx.arc(c, d, q, 0, 2*Math.PI)
-    // ctx.closePath()
-    // ctx.stroke()
     ctx.beginPath()
     ctx.arc(closest[1].x, closest[1].y, 100, 0, 2*Math.PI)
     ctx.closePath()
     ctx.fillStyle = "orange"
     ctx.fill()
 
+    ctx.fillStyle = "rgb(250, 100, 0)"
+    ctx.fillRect(25, 750, 200, 100)
     ctx.fillStyle = "gray"
-    ctx.fillRect(0, 750, canvas.width, 300)
+    ctx.fillRect(0, 850, canvas.width, 200)
 
     if (distance({x:c,y:d}, mousePosition) < hold) {
         currentlyDragging = true
@@ -101,14 +95,21 @@ function runtime() {
         currentlyDragging = false
     }
     if (currentlyDragging == true) {
-        if (distance({x:a, y:b}, mousePosition) > r + q) {
-            theta = Math.atan2(-(b-mousePosition.y), -(a-mousePosition.x))
-            c = a + (r + q)*Math.cos(theta)
-            d = b + (r + q)*Math.sin(theta)
-        } else {
-            c = mousePosition.x
-            d = mousePosition.y
-        }
+        theta1 = Math.atan2((b-closest[1].y), -(a-closest[1].x))
+        theta2 = Math.atan2(closest[1].y - d, -closest[1].x + c) + Math.PI - theta1
+        theta1 *= 180/Math.PI
+        theta2 *= 180/Math.PI
+        console.log(theta2)
+        // if (theta1 > interval1[0] && theta1 < interval1[1] && theta2 > interval2[0] && theta2 < interval2[1]) {
+            if (distance({x:a, y:b}, mousePosition) > r + q) {
+                theta = Math.atan2(-(b-mousePosition.y), -(a-mousePosition.x))
+                c = a + (r + q)*Math.cos(theta)
+                d = b + (r + q)*Math.sin(theta)
+            } else {
+                c = mousePosition.x
+                d = mousePosition.y
+            }
+        // }
     }
 
     ctx.restore()
