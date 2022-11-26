@@ -37,22 +37,49 @@ function click(position) {
 
 }
 
-const gamepads = {};
+// const gamepads = {};
 
-function gamepadHandler(event, connecting) {
-  const gamepad = event.gamepad;
-  // Note:
-  // gamepad === navigator.getGamepads()[gamepad.index]
+// function gamepadHandler(event, connecting) {
+//   const gamepad = event.gamepad;
+//   // Note:
+//   // gamepad === navigator.getGamepads()[gamepad.index]
 
-  if (connecting) {
-    gamepads[gamepad.index] = gamepad;
-  } else {
-    delete gamepads[gamepad.index];
-  }
-}
+//   if (connecting) {
+//     gamepads[gamepad.index] = gamepad;
+//   } else {
+//     delete gamepads[gamepad.index];
+//   }
+// }
 
-window.addEventListener("gamepadconnected", (e) => { gamepadHandler(e, true); }, false);
-window.addEventListener("gamepaddisconnected", (e) => { gamepadHandler(e, false); }, false);s
+// window.addEventListener("gamepadconnected", (e) => { gamepadHandler(e, true); }, false);
+// window.addEventListener("gamepaddisconnected", (e) => { gamepadHandler(e, false); }, false);s
+
+window.addEventListener("gamepadconnected", (e) => {
+    const gp = navigator.getGamepads()[e.gamepad.index];
+    console.log(`Gamepad connected at index ${gp.index}: ${gp.id} with ${gp.buttons.length} buttons, ${gp.axes.length} axes.`);
+  
+    gameLoop()
+});
+
+function gameLoop() {
+      const [gp] = navigator.getGamepads();
+    
+      let a = 0;
+      let b = 0;
+      if (gp.axes[0] !== 0) {
+        b -= gp.axes[0];
+      } else if (gp.axes[1] !== 0) {
+        a += gp.axes[1];
+      } else if (gp.axes[2] !== 0) {
+        b += gp.axes[2];
+      } else if (gp.axes[3] !== 0) {
+        a -= gp.axes[3];
+      }
+    
+      velocity = [b, -a]
+    
+      const start = requestAnimationFrame(gameLoop);
+  };
 
 // var beingDragged = false
 class Robo {
