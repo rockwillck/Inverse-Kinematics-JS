@@ -1,29 +1,29 @@
-var velocity = [0, 0]
+var velocities = [[0, 0], [0, 0]]
 function keydown(key) {
     if (key == "w") {
-        velocity[1] = -1
+        velocities[0][1] = -1
     } if (key == "s") {
-        velocity[1] = 1
+        velocities[0][1] = 1
     }
 
     if (key == "a") {
-        velocity[0] = -1
+        velocities[0][0] = -1
     } if (key == "d") {
-        velocity[0] = 1
+        velocities[0][0] = 1
     }
 }
 
 function keyup(key) {
-    if (key == "w" && velocity[1] == -1) {
-        velocity[1] = 0
-    } if (key == "s" && velocity[1] == 1) {
-        velocity[1] = 0
+    if (key == "w" && velocities[0][1] == -1) {
+        velocities[0][1] = 0
+    } if (key == "s" && velocities[0][1] == 1) {
+        velocities[0][1] = 0
     }
 
-    if (key == "a" && velocity[0] == -1) {
-        velocity[0] = 0
-    } if (key == "d" && velocity[0] == 1) {
-        velocity[0] = 0
+    if (key == "a" && velocities[0][0] == -1) {
+        velocities[0][0] = 0
+    } if (key == "d" && velocities[0][0] == 1) {
+        velocities[0][0] = 0
     }
 }
 
@@ -76,7 +76,7 @@ function gameLoop() {
         a -= gp.axes[3];
       }
     
-      velocity = [b, -a]
+      velocities[1] = [b, -a]
     
       const start = requestAnimationFrame(gameLoop);
   };
@@ -203,9 +203,9 @@ function runtime() {
     ctx.fillStyle = "rgb(50, 50, 50)"
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    arms[0].move(normalize(velocity)[0]*speed, normalize(velocity)[1]*speed)
-    arms.forEach((arm) => {
+    arms.forEach((arm, index) => {
         arm.draw()
+        arms[index].move(normalize(velocities[index])[0]*speed, normalize(velocities[index])[1]*speed)
     })
     ctx.fillStyle = "gray"
     ctx.fillRect(0, 850, canvas.width, 200)
