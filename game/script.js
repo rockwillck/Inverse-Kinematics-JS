@@ -159,6 +159,14 @@ class Robo {
         ctx.font = "80px Arial"
         ctx.fillStyle = this.color
         ctx.fillText(this.points, this.a-80, this.b+30)
+        let theta1 = Math.atan2(-(this.closest[1].y - this.b), (this.closest[1].x - this.a)) + Math.PI*2
+        let theta2 = Math.atan2(-this.d + this.closest[1].y, this.c - this.closest[1].x) + 3*Math.PI - theta1
+        theta1 *= 180/Math.PI
+        theta1 = theta1 % 360
+        theta2 *= 180/Math.PI
+        theta2 = theta2 % 360
+        ctx.font = "20px Arial"
+        ctx.fillText(`(${Math.round(theta1*10)/10}, ${Math.round(theta2*10)/10})`, this.a-30, this.b+30)
 
         this.objects.forEach((obj, index) => {
             let renderPosition = {
@@ -174,6 +182,7 @@ class Robo {
             if (distance(target, renderPosition) <= target.radius + obj) {
                 this.objects.splice(index, 1)
                 this.points++
+                objectsLeft -= 1
             }
         })
 
@@ -233,59 +242,110 @@ var speed = 10
 var target = {x:canvas.width/2, y:canvas.height/2, radius:50}
 var objects = []
 for (i=0;i<4;i++) {
-    objects.push({x:Math.random()*canvas.width/2, y:850, radius:Math.random()*10 + 20})
-    objects.push({x:canvas.width/2 + Math.random()*canvas.width/2, y:850, radius:Math.random()*10 + 20})
+    objects.push({x:Math.random()*canvas.width*0.3 + canvas.width*0.2, y:850, radius:Math.random()*10 + 20})
+    objects.push({x:canvas.width/2 + Math.random()*canvas.width*0.3, y:850, radius:Math.random()*10 + 20})
 }
+var armTarget = objects[0]
+var objectsLeft = objects.length
 function runtime() {
     ctx.save()
     if (shaking) {
         ctx.translate(Math.random() < 0.5 ? -Math.random()*shakeFactor : Math.random()*shakeFactor, Math.random() < 0.5 ? -Math.random()*shakeFactor : Math.random()*shakeFactor)
     }
 
-    ctx.fillStyle = "rgb(50, 50, 50)"
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    // if (objectsLeft > 0) {
+        ctx.fillStyle = "rgb(50, 50, 50)"
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    if (gamepad) {
-        const [gp] = navigator.getGamepads();
-    
-        let a = 0;
-        let b = 0;
-        if (gp.axes[0] !== 0) {
-          b -= gp.axes[0];
-        } else if (gp.axes[1] !== 0) {
-          a += gp.axes[1];
-        } else if (gp.axes[2] !== 0) {
-          b += gp.axes[2];
-        } else if (gp.axes[3] !== 0) {
-          a -= gp.axes[3];
+        if (gamepad) {
+            const [gp] = navigator.getGamepads();
+        
+            let a = 0;
+            let b = 0;
+            if (gp.axes[0] !== 0) {
+            b -= gp.axes[0];
+            } else if (gp.axes[1] !== 0) {
+            a += gp.axes[1];
+            } else if (gp.axes[2] !== 0) {
+            b += gp.axes[2];
+            } else if (gp.axes[3] !== 0) {
+            a -= gp.axes[3];
+            }
+        
+            velocities[1] = [b, -a]
         }
-      
-        velocities[1] = [b, -a]
-    }
 
-    ctx.beginPath()
-    ctx.arc(target.x, target.y, target.radius, 0, 2*Math.PI)
-    ctx.closePath()
-    ctx.fillStyle = "black"
-    ctx.strokeStyle = "white"
-    ctx.lineWidth = 5
-    ctx.fill()
-    ctx.stroke()
-
-    arms.forEach((arm, index) => {
-        arm.draw()
-        arms[index].move(normalize(velocities[index])[0]*speed, normalize(velocities[index])[1]*speed)
-    })
-    ctx.fillStyle = "gray"
-    ctx.fillRect(0, 850, canvas.width, 200)
-    
-    objects.forEach((obj) => {
         ctx.beginPath()
-        ctx.arc(obj.x, obj.y, obj.radius, 0, 2*Math.PI)
+        ctx.arc(target.x, target.y, target.radius, 0, 2*Math.PI)
         ctx.closePath()
-        ctx.fillStyle = "red"
+        ctx.fillStyle = "black"
+        ctx.strokeStyle = "white"
+        ctx.lineWidth = 5
         ctx.fill()
-    })
+        ctx.stroke()
+
+        arms.forEach((arm, index) => {
+            arm.draw()
+            arms[index].move(normalize(velocities[index])[0]*speed, normalize(velocities[index])[1]*speed)
+        })
+
+        arm1 = arms[0]
+        velocities[0] = [armTarget.x - arm1.c, armTarget.y - arm1.d]
+        objectClaimed = false
+        if (arm1.objects.length == 0) {
+            objectClaimed = distance({x:arm1.a, y:arm1.b}, armTarget) > arm1.r + arm1.q
+            console.log(distance({x:arm1.a, y:arm1.b}, armTarget),  arm1.r + arm1.q)
+            claimed = true
+            reachable = 0
+            objects.forEach((obj) => {
+                if (obj == armTarget) {
+                    claimed = false
+                }
+                if (distance({x:arm1.a, y:arm1.b}, obj) <= arm1.r + arm1.q) {
+                    reachable ++
+                }
+            })
+            objectClaimed = objectClaimed || claimed
+            if (armTarget == target || objectClaimed) {
+                if (reachable > 0) {
+                    armTarget = objects[Math.floor(Math.random()*objects.length)]
+                } else {
+                    armTarget = {x:600, y:300}
+                }
+            }
+        } else {
+            armTarget = target
+        }
+
+        ctx.fillStyle = "gray"
+        ctx.fillRect(0, 850, canvas.width, 200)
+        
+        objects.forEach((obj) => {
+            ctx.beginPath()
+            ctx.arc(obj.x, obj.y, obj.radius, 0, 2*Math.PI)
+            ctx.closePath()
+            ctx.fillStyle = "red"
+            ctx.fill()
+        })
+    // } else {
+    if (objectsLeft == 0) {
+        winning = 0
+        arms.forEach((arm) => {
+            if (arm.points > winning) {
+                winning = arm.points
+            }
+        })
+
+        winners = []
+        arms.forEach((arm, index) => {
+            if (arm.points == winning) {
+                winners.push(index + 1)
+            }
+        })
+        document.getElementById("win").innerText = (`Player${winners.length > 1 ? "s" : ""} ${winners} won!`)
+        document.getElementById("banner").style.top = "0"
+    }
+    // }
 
     ctx.restore()
 }

@@ -12,10 +12,42 @@
         padding:0;
         background-color: rgb(165, 85, 85);
     }
+
+    .announcement {
+        position:absolute;
+        top:-100vmin;
+        left:0;
+        width:100%;
+        margin:none;
+        color:black;
+        text-align: center;
+        background-color: lightblue;
+        font-family: Arial, Helvetica, sans-serif;
+        padding-top:1vmin;
+        padding-bottom: 1vmin;
+        border-bottom-left-radius: 2vmin;
+        border-bottom-right-radius: 2vmin;
+        transition:0.5s;
+    }
+
+    button {
+        background: blue;
+        border:none;
+        border-radius: 0.5vmin;
+        padding:2vmin;
+        color:white;
+        font-size: 2vmin;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        opacity:0.5
+    }
 </style>
 
 <body onresize="resized()">
     <canvas id="canvas"></canvas>
+    <div class="announcement" id="banner"><p id="win">-</p><button onclick="window.location.reload(true)">Play again</button></div>
 </body>
 
 <script src="../systems.js"></script>
