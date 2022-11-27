@@ -54,32 +54,38 @@ function click(position) {
 // window.addEventListener("gamepadconnected", (e) => { gamepadHandler(e, true); }, false);
 // window.addEventListener("gamepaddisconnected", (e) => { gamepadHandler(e, false); }, false);s
 
+gamepad = false
 window.addEventListener("gamepadconnected", (e) => {
     const gp = navigator.getGamepads()[e.gamepad.index];
     console.log(`Gamepad connected at index ${gp.index}: ${gp.id} with ${gp.buttons.length} buttons, ${gp.axes.length} axes.`);
   
-    gameLoop()
+    // gameLoop()
+    gamepad = true
 });
+window.addEventListener("gamepaddisconnected", (e) => {
+    gamepad = false
+})
 
-function gameLoop() {
-      const [gp] = navigator.getGamepads();
+
+// function gameLoop() {
+//       const [gp] = navigator.getGamepads();
     
-      let a = 0;
-      let b = 0;
-      if (gp.axes[0] !== 0) {
-        b -= gp.axes[0];
-      } else if (gp.axes[1] !== 0) {
-        a += gp.axes[1];
-      } else if (gp.axes[2] !== 0) {
-        b += gp.axes[2];
-      } else if (gp.axes[3] !== 0) {
-        a -= gp.axes[3];
-      }
+//       let a = 0;
+//       let b = 0;
+//       if (gp.axes[0] !== 0) {
+//         b -= gp.axes[0];
+//       } else if (gp.axes[1] !== 0) {
+//         a += gp.axes[1];
+//       } else if (gp.axes[2] !== 0) {
+//         b += gp.axes[2];
+//       } else if (gp.axes[3] !== 0) {
+//         a -= gp.axes[3];
+//       }
     
-      velocities[1] = [b, -a]
+//       velocities[1] = [b, -a]
     
-      const start = requestAnimationFrame(gameLoop);
-  };
+//       const start = requestAnimationFrame(gameLoop);
+//   };
 
 // var beingDragged = false
 class Robo {
@@ -95,6 +101,9 @@ class Robo {
         this.color = color
         this.accent = accent
         this.closest = [0, 0]
+        this.objects = []
+        this.limit = 1
+        this.points = 0
         // this.currentlyDragging = false
     }
 
@@ -147,6 +156,26 @@ class Robo {
 
         ctx.fillStyle = this.accent
         ctx.fillRect(this.a-100, this.b-50, 200, 100)
+        ctx.font = "80px Arial"
+        ctx.fillStyle = this.color
+        ctx.fillText(this.points, this.a-80, this.b+30)
+
+        this.objects.forEach((obj, index) => {
+            let renderPosition = {
+                x:this.c + this.flip*obj*normalize([1, (this.closest[1].y - this.d)/(this.closest[1].x - this.c)])[0], 
+                y:this.d + this.flip*obj*normalize([1, (this.closest[1].y - this.d)/(this.closest[1].x - this.c)])[1]
+            }
+            ctx.beginPath()
+            ctx.arc(renderPosition.x, renderPosition.y, obj, 0, 2*Math.PI)
+            ctx.closePath()
+            ctx.fillStyle = "red"
+            ctx.fill()
+
+            if (distance(target, renderPosition) <= target.radius + obj) {
+                this.objects.splice(index, 1)
+                this.points++
+            }
+        })
 
         // if (distance({x:this.c,y:this.d}, mousePosition) < hold && !beingDragged) {
         //     this.currentlyDragging = true
@@ -179,6 +208,13 @@ class Robo {
             this.c = this.c + x
             this.d = this.d + y
         }
+
+        objects.forEach((obj, index) => {
+            if (this.objects.length < this.limit && distance({x:this.c, y:this.d}, obj) <= obj.radius + hold) {
+                this.objects.push(obj.radius)
+                objects.splice(index, 1)
+            }
+        })
     }
 }
 
@@ -194,6 +230,12 @@ var lastAngle = 0
 var interval1 = [60, 120]
 var interval2 = [85, 180]
 var speed = 10
+var target = {x:canvas.width/2, y:canvas.height/2, radius:50}
+var objects = []
+for (i=0;i<4;i++) {
+    objects.push({x:Math.random()*canvas.width/2, y:850, radius:Math.random()*10 + 20})
+    objects.push({x:canvas.width/2 + Math.random()*canvas.width/2, y:850, radius:Math.random()*10 + 20})
+}
 function runtime() {
     ctx.save()
     if (shaking) {
@@ -203,12 +245,47 @@ function runtime() {
     ctx.fillStyle = "rgb(50, 50, 50)"
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+    if (gamepad) {
+        const [gp] = navigator.getGamepads();
+    
+        let a = 0;
+        let b = 0;
+        if (gp.axes[0] !== 0) {
+          b -= gp.axes[0];
+        } else if (gp.axes[1] !== 0) {
+          a += gp.axes[1];
+        } else if (gp.axes[2] !== 0) {
+          b += gp.axes[2];
+        } else if (gp.axes[3] !== 0) {
+          a -= gp.axes[3];
+        }
+      
+        velocities[1] = [b, -a]
+    }
+
+    ctx.beginPath()
+    ctx.arc(target.x, target.y, target.radius, 0, 2*Math.PI)
+    ctx.closePath()
+    ctx.fillStyle = "black"
+    ctx.strokeStyle = "white"
+    ctx.lineWidth = 5
+    ctx.fill()
+    ctx.stroke()
+
     arms.forEach((arm, index) => {
         arm.draw()
         arms[index].move(normalize(velocities[index])[0]*speed, normalize(velocities[index])[1]*speed)
     })
     ctx.fillStyle = "gray"
     ctx.fillRect(0, 850, canvas.width, 200)
+    
+    objects.forEach((obj) => {
+        ctx.beginPath()
+        ctx.arc(obj.x, obj.y, obj.radius, 0, 2*Math.PI)
+        ctx.closePath()
+        ctx.fillStyle = "red"
+        ctx.fill()
+    })
 
     ctx.restore()
 }
