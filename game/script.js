@@ -162,8 +162,8 @@ class Robo {
 
         this.objects.forEach((obj, index) => {
             let renderPosition = {
-                x:this.c + this.flip*obj*normalize([1, (this.closest[1].y - this.d)/(this.closest[1].x - this.c)])[0], 
-                y:this.d + this.flip*obj*normalize([1, (this.closest[1].y - this.d)/(this.closest[1].x - this.c)])[1]
+                x:this.c + this.flip*(obj + hold)*normalize([1, (this.closest[1].y - this.d)/(this.closest[1].x - this.c)])[0], 
+                y:this.d + this.flip*(obj + hold)*normalize([1, (this.closest[1].y - this.d)/(this.closest[1].x - this.c)])[1]
             }
             ctx.beginPath()
             ctx.arc(renderPosition.x, renderPosition.y, obj, 0, 2*Math.PI)
