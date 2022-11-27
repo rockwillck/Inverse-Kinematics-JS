@@ -294,7 +294,6 @@ function runtime() {
         objectClaimed = false
         if (arm1.objects.length == 0) {
             objectClaimed = distance({x:arm1.a, y:arm1.b}, armTarget) > arm1.r + arm1.q
-            console.log(distance({x:arm1.a, y:arm1.b}, armTarget),  arm1.r + arm1.q)
             claimed = true
             reachable = 0
             objects.forEach((obj) => {
